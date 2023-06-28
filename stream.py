@@ -621,7 +621,5 @@ def main():
     st.write("Email: info@str-ucture.com")
     st.write("Phone: +49 (0)711 286937-0")
 
-
-if __name__ == "__main__":
-    main()
+main()
 
