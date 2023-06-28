@@ -616,13 +616,13 @@ def main():
     st.markdown("## Contact Information")
     st.write("For any inquiries, please contact:")
     st.markdown("**str.ucture GmbH**: Lightweight Design. Made in Stuttgart. ")
-    st.markdown('<small>')
+    st.markdown("<small>")
     st.markdown("Lindenspürstr. 32")
     st.markdown('70176 Stuttgart')
     st.markdown("Germany")
     st.markdown("Email: [info@str-ucture.com](mailto:info@str-ucture.com)")
     st.markdown("Phone: [+49 (0)711 286937-0](tel:+49 (0)711 286937-0)")
-    st.markdown('<small>')
+    st.markdown("<small>")
 
 main()
 
