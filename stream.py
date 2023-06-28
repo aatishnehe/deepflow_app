@@ -606,3 +606,22 @@ with viewer:
         #fig = genQuiverPlot(st.session_state.prediction, freq = 6)
 
         #st.plotly_chart(fig, use_container_width=True)
+
+
+def main():
+    # Your Streamlit app code goes here
+
+    # Add company contact info at the bottom
+    st.markdown("---")
+    st.write("For any inquiries, please contact:")
+    st.write("str.ucture GmbH: Lightweight Design. Made in Stuttgart. ")
+    st.write("Lindenspürstr. 32")
+    st.write('70176 Stuttgart')
+    st.write("Germany")
+    st.write("Email: info@str-ucture.com")
+    st.write("Phone: +49 (0)711 286937-0")
+
+
+if __name__ == "__main__":
+    main()
+
