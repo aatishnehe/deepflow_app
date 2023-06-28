@@ -9,15 +9,6 @@ from utility_functions import *
 import plotly.figure_factory as ff
 import predict
 
-
-
-# [0] pressure output vert profile
-# [1] velocity X output vert profile
-# [2] velocity Z output vert profile
-# [3] pressure output hor profile
-# [4] velocity X output hor profile
-# [5] velocity Z output hor profile
-
 def genQuiverPlot(vx, vy, freq):
     filter_freq = freq
 
@@ -64,28 +55,16 @@ def genQuiverPlot(vx, vy, freq):
 
 def genPlotlyResult(stl_mesh_building, ptX, ptY, ptZ, height, vel, nn_res, p_v_toggle, planeToggle, op, s, op_b):
 
-    #np.savez_compressed('D:\\DeepFlow_local\\DeepFlowPrediction\\train\\saved_results_web.npz', a=np.nan_to_num(nn_res))
-
     p_vert = nn_res[0, :, :]
     v_vert = nn_res[1, :, :]
     p_hor = nn_res[2, :, :]
     v_hor = nn_res[3, :, :]
-    #v_hor_y = nn_res[4, :, :]
-    #v_vert_y = nn_res[5, :, :]
-
-    #p_vert = p_vert.transpose()
-    #v_vert = v_vert.transpose()
-    #p_hor = p_hor.transpose()
-    #v_hor = v_hor.transpose()
-    #v_hor_y = v_hor_y.transpose()
-    #v_vert_y = v_vert_y.transpose()
 
     vertices, I, J, K = stl2mesh3d(stl_mesh_building)
     x, y, z = vertices.T
     minx, maxx, miny, maxy, minz, maxz = find_mins_maxs(stl_mesh_building)
     # Plot Building
     mesh3D = genBuilding(x, y, z, I, J, K, op_b, 'rgb(64,64,64)')
-
 
     # Plot wind direction vector
     vector, cone = genArrow(minx, maxx, miny, maxy, minz, maxz, vel, windProfileScaleFactor)
@@ -106,28 +85,24 @@ def genPlotlyResult(stl_mesh_building, ptX, ptY, ptZ, height, vel, nn_res, p_v_t
     windProfile = go.Scatter3d(x=wx, y=wy, z=windPoints, marker=dict(size=1,color='rgb(0,176,240)'), line=dict(color='rgb(0,176,240)',
                                     width=3), name="ABL" )
     Z = np.zeros(ptX.size*ptY.size)
-    #st.write('Height: ', height)
+
     Y0 = np.full(ptX.size, height[0])
     for p, item in enumerate(Z):
         Z[p] = height[1]
-    #st.write(nn_res[0, :, :])
+
     #horizontales Profil
     if p_v_toggle == 1:
         res_nn_h = go.Surface(x=ptX, y=ptY, z=Z.reshape(ptX.size, ptY.size), surfacecolor=p_hor, opacity=op)
     elif p_v_toggle == 2:
         res_nn_h = go.Surface(x=ptX, y=ptY, z=Z.reshape(ptX.size, ptY.size), surfacecolor=v_hor, opacity=op)
-    #st.write("horizontal", nn_res[1])
+
     #vertikales Profil
     Zp = np.tile(ptZ, (1, ptX.size)).reshape(ptX.size, ptY.size)
-
-    #st.write(ptX, Y0)
-    #st.write(Zp)
 
     if p_v_toggle == 1:
         res_nn_v = go.Surface(x=ptX, y=Y0, z=np.transpose(Zp), surfacecolor=p_vert, opacity=op)
     elif p_v_toggle == 2:
         res_nn_v = go.Surface(x=ptX, y=Y0, z=np.transpose(Zp), surfacecolor=v_vert, opacity=op)
-    #st.write("vertikal", nn_res[0])
 
     title = ""
     layout = go.Layout(paper_bgcolor='lightgray',
@@ -157,7 +132,6 @@ def genPlotlyResult(stl_mesh_building, ptX, ptY, ptZ, height, vel, nn_res, p_v_t
     figure.data[0].update(lightposition=dict(x=3000,
                                           y=3000,
                                           z=10000))
-    #figure.data[3].update_traces(visible="False")
     figure.update_scenes(aspectmode="data")
 
     return figure
@@ -176,7 +150,6 @@ def preProcessingData(trimeshData):
         st.stop()
     # calculate the centre of the bounding box in y-dir
     yCentre = mean(boundingBox[:, 1])
-    #st.write("bbox center in y-dir", yCentre)
     # scale factors
     sx = 3.
     sy = 2.
@@ -184,19 +157,14 @@ def preProcessingData(trimeshData):
     ScaleMatrix = np.array([[sx, 0., 0.], [0., sy, 0.], [0., 0., sz]])
     # scale the bounding box
     boundingBox = np.transpose(np.dot(ScaleMatrix, np.transpose(boundingBox)))
-    #st.write(boundingBox)
     # move the bounding box
     # get dim in x for translation of bounding box
     bbDimx = abs(boundingBox[0, 0]) + abs(boundingBox[1, 0])
     boundingBox = np.add(boundingBox, np.array([[0.2 * bbDimx, -yCentre, 0], [0.2 * bbDimx, -yCentre, 0]]))
-    #st.write(boundingBox)
     bbox_centres = np.zeros(3)
     for i in range(3):
         bbox_centres[i] = np.mean(boundingBox[:, i])
-    #st.write("bbox center", bbox_centres)
     st.session_state.cutH = [bbox_centres[1], bbox_centres[2] / sz]
-    #st.write(st.session_state.cutH)
-
 
     # get enlarged bounding box edge lengths
     l = np.array([abs(boundingBox[1, 0] - boundingBox[0, 0]), abs(boundingBox[1, 1] - boundingBox[0, 1]),
@@ -209,7 +177,6 @@ def preProcessingData(trimeshData):
     st.session_state.pty = pointsY
     st.session_state.ptz = pointsZ
 
-    #st.write(pointsZ)
     ptCloudH = []
     ptCloudV = []
 
@@ -217,26 +184,13 @@ def preProcessingData(trimeshData):
         for pt_y in pointsY:
             ptCloudH.append([pt_x, pt_y, bbox_centres[2] / sz])
     ptCloudH = np.array(ptCloudH)
-    #st.write(ptCloudH.shape)
-
-    #st.write(trimeshData.contains(ptCloudH[pt].reshape(1, 3)))
 
     for pt_x in pointsX:
         for pt_z in pointsZ:
             ptCloudV.append([pt_x, bbox_centres[1], pt_z + 0.5])
     ptCloudV = np.array(ptCloudV)
 
-    #st.write(len(ptCloudV))
-
-    # input layout channels for Deep Flow:
-    # [0] freestream field X + boundary vert profile
-    # [1] freestream field X + boundary hor profile
-    # [2] binary mask for boundary in Z-dir vert profile
-    # [3] binary mask for boundary in Y-dir hor profile
-
     input_df = np.zeros((4, N, N))
-
-    #st.write(N)
 
     curIndex = 0
     # horizontal pt Cloud
@@ -252,9 +206,7 @@ def preProcessingData(trimeshData):
                 val = atmFreeStreamX(avVel, bbox_centres[2] / sz)
                 input_df[1][y][x] = val
             curIndex += 1
-            #st.write(curIndex)
 
-    #st.write(curIndex)
     # vertical pt Cloud
     curIndex = 0
     for x in range(N):
@@ -315,15 +267,11 @@ def denormalise_velocity(DF, v_norm):
     max_v1 = np.max(np.abs(denormalised_df[0, :, :]))
     max_v2 = np.max(np.abs(denormalised_df[1, :, :]))
 
-    # a[0, :, :] /= (1.0/self.max_targets_0_p)
     denormalised_df[0, :, :] /= (1.0 / max_v1)
     denormalised_df[1, :, :] /= (1.0 / max_v2)
 
-    # a[0, :, :] *= v_norm ** 2
     denormalised_df[0, :, :] *= v_norm
     denormalised_df[1, :, :] *= v_norm
-
-    #st.write('denormalised_df shape: ', denormalised_df.shape)
 
     return denormalised_df
 
@@ -339,8 +287,6 @@ def denormalise_pressure(DF, v_norm):
 
     denormalised_df[0, :, :] += np.mean(denormalised_df[0, :, :])
 
-    #st.write('denormalised_df shape: ', denormalised_df.shape)
-
     return denormalised_df
 
 
@@ -350,6 +296,14 @@ st.set_page_config(
     page_icon="🌬"
 )
 
+hide_default_format = """
+       <style>
+       #MainMenu {visibility: hidden; }
+       footer {visibility: hidden;}
+       </style>
+       """
+st.markdown(hide_default_format, unsafe_allow_html=True)
+
 # Containers
 header = st.container()
 user_input = st.container()
@@ -357,17 +311,55 @@ building_vis = st.container()
 compute = st.container()
 viewer = st.container()
 
+# Add the footer
+footer_html = """
+<style>
+.footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: #f5f5f5;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #777777;
+}
+.contact-info {
+    text-align: right;
+    line-height: 0.6;  
+}
+
+.company-name a {
+    color: #e84177;
+}
+    
+</style>
+
+<div class="footer">
+    <div style="flex-grow: 1; text-align: center;">
+        <p><span class="company-name"><a href="https://www.str-ucture.com/" target="_blank" rel="noopener noreferrer">str</a></span><strong>.ucture</strong> GmbH| All rights reserved. </p>
+    </div>
+    <div class="contact-info">
+        <p><strong>Lightweight Design, Made in Stuttgart</strong></p>
+        <p>Email: <a href="mailto:info@str-ucture.com">info@str-ucture.com</a></p>
+        <p>Phone: <a href="tel:+497112869370">+49 (0)711 286937-0</a></p>
+    </div>
+    
+</div>
+"""
+
+st.markdown(footer_html, unsafe_allow_html=True)
+
+
 # Global variables
 
 N = 128
 windProfileScaleFactor = 0.5
 
-#prediction = np.empty((6, N, N))
 inputArray = np.empty((2, N, N))
-#ptx = np.empty(N)
-#pty = np.empty(N)
-#ptz = np.empty(N)
-#cutH = np.empty(2)
 
 if 'prediction' not in st.session_state:
     st.session_state.prediction = np.empty((6, N, N))
@@ -387,14 +379,11 @@ if 'cutH' not in st.session_state:
     st.session_state.cutH = np.empty(2)
 
 result = False
-# header
-#page header
 with header:
     col1, col2 = st.columns([3, 1])
     with col1:
-    #st.image('https://www.clipartmax.com/png/middle/319-3190374_big-image-vector-free-dandelion-icon-transparent.png', width=60)
-        #st.write('Current Dir: ', os.getcwd())
-        f = open("./Images/Logo_one3d_by_structure_rgb.svg", "r")
+
+        f = open("./Images/str.svg", "r")
         lines = f.readlines()
         line_string = ''.join(lines)
         st.write(render_svg(line_string), unsafe_allow_html=True)
@@ -404,23 +393,20 @@ with header:
         lines = f.readlines()
         line_string = ''.join(lines)
         st.write(render_svg(line_string), unsafe_allow_html=True)
-        #st.image('./app/logo_dandi.png', width=120)
 
     st.subheader("Preliminaries")
-    #about app
+
 with header.expander("What is str.FLOWer?", expanded=False):
     st.markdown("""
-    This is v.alpha of the **steady wind flow generator** based on an artificial neural network and so on ...
-    ...
-    Thanks to
-    ...
+    This is trial version of the **steady wind flow generator**. It could provide fast (near real-time) estimation of Wind Flow 
+    around Building using Artificial Intelligence. 
     """)
 
 with header.expander("CNN Model and Training Data", expanded=False):
     st.markdown("""
     The CNN Network is similar to Thurey et al. 2020 ... Models are...
     """)
-# input
+
 with user_input:
 
     st.subheader("Inputs")
@@ -456,7 +442,6 @@ with user_input:
         trimeshdata = trimesh.load_mesh("stl_tmp.stl", file_type='stl')
         #st.write(trimeshdata)
 
-
 # visualisation
 with building_vis:
     if build_mesh is not None:
@@ -478,52 +463,30 @@ with compute:
         st.subheader("Prediction")
         result = st.button("Update Prediction using str.FLOWer")
 
-    #result_str= st.select_slider("Slide to predict the steady wind flow field using str.FLOWer", options=["Wait...", "Do it!"])
-    #if result_str == "Wait...":
-    #    result = False
-    #elif result_str == "Do it!":
-    #    result = True
-
-    #
     # generate point clouds NxN for Deep Flow evaluation
-
     oldSessionStateCount = st.session_state.count
 
     if result:
         st.session_state.count += 1
-        #st.write(st.session_state.count)
-
 
     if not st.session_state.predicted or (st.session_state.count - oldSessionStateCount) != 0:
 
         with st.spinner('Processing...'):
 
             tic = time.perf_counter()
-            #st.write(trimeshdata)
-            #inputDF = preProcessingData(trimeshdata)
+
             try:
                 inputDF = preProcessingData(trimeshdata)
-                #np.savez_compressed('D:\\DeepFlow_local\\DeepFlowPrediction\\train\\preprocessed_input.npz', a=np.nan_to_num(inputDF))
-                #st.write('Input Dimensions: ', inputDF.shape)
             except:
                 st.write("You did not upload a geometry... Aborting!")
                 st.stop()
-            #toc = time.perf_counter()
-
-            # st.write(st.session_state.prediction)
-            # NN to go
-
-            #tic2 = time.perf_counter()
 
             detachedPrediction = np.zeros((6, N, N))
 
             inputDF = normalisation(inputDF)
-            #st.write('Vertical cuts dim: ', inputDF[[0, 2], :, :].shape)
 
             [detachedPrediction_hor_pressure, detachedPrediction_hor_velocity] = strFLOWPrediction_hor(inputDF[[1,3], :, :])
             [detachedPrediction_ver_pressure, detachedPrediction_ver_velocity] = strFLOWPrediction_ver(inputDF[[0,2], :, :])
-
-            #st.write('Prediction Dims 1 : ', detachedPrediction_hor_velocity.shape)
 
             detachedPrediction[0] = detachedPrediction_ver_pressure
             detachedPrediction[1] = detachedPrediction_ver_velocity[0][0]
@@ -538,12 +501,7 @@ with compute:
             detachedPrediction[[1, 3]] = denormalise_velocity(detachedPrediction[[1,3]], v_norm)
             detachedPrediction[[0, 2]] = denormalise_velocity(detachedPrediction[[0, 2]], v_norm)
 
-
-            #st.write('Prediction Dims: ', detachedPrediction.shape)
-
             st.session_state.prediction = detachedPrediction
-            #st.write(st.session_state.prediction)
-            #np.copyto(prediction, detachedPrediction)
 
             toc = time.perf_counter()
             st.session_state.calcTime = toc - tic
@@ -562,9 +520,8 @@ def ClickpChecker():
         st.session_state.pChecker = False
 
 
-
 with viewer:
-    #st.write("Calculation finished.")
+
     st.write("""Job done. Preprocessing the input data took and evaluating the artificial neurol network took %0.4s seconds.""" % st.session_state.calcTime)
     if st.session_state.predicted:
         st.subheader("Steady wind flow visualization")
@@ -599,30 +556,4 @@ with viewer:
                                     st.session_state.cutH, avVel, st.session_state.prediction, varSliderToggle,
                                     cutPlaneToggle, opacity/100., windProfileScaleFactor, opacity_building/100.)
 
-            # stream the plotly chart
-
         st.plotly_chart(figResult, use_container_width=True)
-
-        #fig = genQuiverPlot(st.session_state.prediction, freq = 6)
-
-        #st.plotly_chart(fig, use_container_width=True)
-
-
-def main():
-    # Your Streamlit app code goes here
-
-    # Add company contact info at the bottom
-    st.markdown("---")
-    st.markdown("## Contact Information")
-    st.write("For any inquiries, please contact:")
-    st.markdown("**str.ucture GmbH**: Lightweight Design. Made in Stuttgart. ")
-    st.markdown("<small>")
-    st.markdown("Lindenspürstr. 32")
-    st.markdown('70176 Stuttgart')
-    st.markdown("Germany")
-    st.markdown("Email: [info@str-ucture.com](mailto:info@str-ucture.com)")
-    st.markdown("Phone: [+49 (0)711 286937-0](tel:+49 (0)711 286937-0)")
-    st.markdown("</small>")
-
-main()
-
