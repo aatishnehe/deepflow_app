@@ -504,7 +504,7 @@ with compute:
             try:
                 inputDF = preProcessingData(trimeshdata)
                 #np.savez_compressed('D:\\DeepFlow_local\\DeepFlowPrediction\\train\\preprocessed_input.npz', a=np.nan_to_num(inputDF))
-                st.write('Input Dimensions: ', inputDF.shape)
+                #st.write('Input Dimensions: ', inputDF.shape)
             except:
                 st.write("You did not upload a geometry... Aborting!")
                 st.stop()
