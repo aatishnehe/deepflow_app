@@ -8,7 +8,7 @@ from statistics import mean
 from utility_functions import *
 import plotly.figure_factory as ff
 import predict
-import os
+
 
 
 # [0] pressure output vert profile
@@ -400,7 +400,7 @@ with header:
         st.write(render_svg(line_string), unsafe_allow_html=True)
 
     with col2:
-        f = open("./Images/FLOWER_dandi.svg", "r")
+        f = open("./Images/FLOWer_dandi.svg", "r")
         lines = f.readlines()
         line_string = ''.join(lines)
         st.write(render_svg(line_string), unsafe_allow_html=True)
