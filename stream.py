@@ -622,7 +622,7 @@ def main():
     st.markdown("Germany")
     st.markdown("Email: [info@str-ucture.com](mailto:info@str-ucture.com)")
     st.markdown("Phone: [+49 (0)711 286937-0](tel:+49 (0)711 286937-0)")
-    st.markdown("<small>")
+    st.markdown("</small>")
 
 main()
 
