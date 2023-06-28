@@ -172,7 +172,7 @@ class TurbNetG_pressure(nn.Module):
 
 def predict_ver_pressure(inputDF):
     net = TurbNetG_pressure()
-    net.load_state_dict(torch.load(".\\saved_models\\model_pressure_1000", map_location=torch.device('cpu')))
+    net.load_state_dict(torch.load("./saved_models/model_pressure_1000", map_location=torch.device('cpu')))
     net.eval()
 
     # Generate prediction
@@ -187,7 +187,7 @@ def predict_ver_pressure(inputDF):
 
 def predict_hor_pressure(inputDF):
     net = TurbNetG_pressure()
-    net.load_state_dict(torch.load(".\\saved_models\\trained_models_model_pressure_500_hor", map_location=torch.device('cpu')))
+    net.load_state_dict(torch.load("./saved_models/trained_models_model_pressure_500_hor", map_location=torch.device('cpu')))
     net.eval()
 
     # Generate prediction
@@ -202,7 +202,7 @@ def predict_hor_pressure(inputDF):
 
 def predict_hor_vel(inputDF):
     net = TurbNetG_vel()
-    net.load_state_dict(torch.load(".\\saved_models\\trained_models_model_velocity_alle", map_location=torch.device('cpu')))
+    net.load_state_dict(torch.load("./saved_models/trained_models_model_velocity_alle", map_location=torch.device('cpu')))
     net.eval()
 
     # Generate prediction
@@ -222,7 +222,7 @@ def predict_hor_vel(inputDF):
 
 def predict_ver_vel(inputDF):
     net = TurbNetG_vel()
-    net.load_state_dict(torch.load(".\\saved_models\\model_velocity_alle", map_location=torch.device('cpu')))
+    net.load_state_dict(torch.load("./saved_models/model_velocity_alle", map_location=torch.device('cpu')))
     net.eval()
 
     # Generate prediction
