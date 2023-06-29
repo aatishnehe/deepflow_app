@@ -99,7 +99,7 @@ def genPlotlyMesh(stl_mesh_building, name, vel, s):
 
     title = "%s" %str(name)
     layout = go.Layout(paper_bgcolor='lightgray',
-                       title_text=title, title_x=0.5,
+                       title_text=title, title_x=0.4,
                        font_color='white',
                        width=1200,
                        scene_camera=dict(eye=dict(x=-1., y=-1.8, z=1)),

@@ -8,6 +8,7 @@ from statistics import mean
 from utility_functions import *
 import plotly.figure_factory as ff
 import predict
+import tempfile
 
 def genQuiverPlot(vx, vy, freq):
     filter_freq = freq
@@ -90,29 +91,32 @@ def genPlotlyResult(stl_mesh_building, ptX, ptY, ptZ, height, vel, nn_res, p_v_t
     for p, item in enumerate(Z):
         Z[p] = height[1]
 
-    #horizontales Profil
+    # horizontales Profil
     if p_v_toggle == 1:
-        res_nn_h = go.Surface(x=ptX, y=ptY, z=Z.reshape(ptX.size, ptY.size), surfacecolor=p_hor, opacity=op)
+        res_nn_h = go.Surface(x=ptX, y=ptY, z=Z.reshape(ptX.size, ptY.size), surfacecolor=p_hor, opacity=op, showscale=False)
     elif p_v_toggle == 2:
-        res_nn_h = go.Surface(x=ptX, y=ptY, z=Z.reshape(ptX.size, ptY.size), surfacecolor=v_hor, opacity=op)
+        res_nn_h = go.Surface(x=ptX, y=ptY, z=Z.reshape(ptX.size, ptY.size), surfacecolor=v_hor, opacity=op, showscale=False)
 
-    #vertikales Profil
+    # vertikales Profil
     Zp = np.tile(ptZ, (1, ptX.size)).reshape(ptX.size, ptY.size)
 
     if p_v_toggle == 1:
-        res_nn_v = go.Surface(x=ptX, y=Y0, z=np.transpose(Zp), surfacecolor=p_vert, opacity=op)
+        res_nn_v = go.Surface(x=ptX, y=Y0, z=np.transpose(Zp), surfacecolor=p_vert, opacity=op, showscale=False)
     elif p_v_toggle == 2:
-        res_nn_v = go.Surface(x=ptX, y=Y0, z=np.transpose(Zp), surfacecolor=v_vert, opacity=op)
+        res_nn_v = go.Surface(x=ptX, y=Y0, z=np.transpose(Zp), surfacecolor=v_vert, opacity=op, showscale=False)
 
-    title = ""
+    title = "AI Predictions for the Wind Flow"
     layout = go.Layout(paper_bgcolor='lightgray',
-                       title_text=title, title_x=0.5,
+                       title_text=title,
+                       title_x=0.3,
                        font_color='white',
                        width=1200,
                        scene_camera=dict(eye=dict(x=-1., y=-1.8, z=1)),
                        scene_xaxis_visible=False,
                        scene_yaxis_visible=False,
                        scene_zaxis_visible=True,
+                       scene_aspectmode='manual',  # Set aspect mode to manual
+                       scene_aspectratio=dict(x=1, y=1, z=1)
                        )
 
     if planeToggle == 1:
@@ -290,6 +294,14 @@ def denormalise_pressure(DF, v_norm):
     return denormalised_df
 
 
+def convert_obj_to_stl(obj_file, stl_file):
+    # Load the OBJ file
+    obj_mesh = stl.mesh.Mesh.from_file(obj_file)
+
+    # Save the mesh as STL
+    obj_mesh.save(stl_file)
+
+
 # PAGE cfig
 st.set_page_config(
     page_title="str.FLOWer",
@@ -411,36 +423,60 @@ with user_input:
 
     st.subheader("Inputs")
     with st.form("Geometry"):
-        build_mesh = st.file_uploader(label="Place your building as a closed *stl mesh here", type='stl')
+        build_mesh = st.file_uploader(label="Place your building as a closed .stl or .obj mesh here",
+                                      type=['obj', 'stl'])
 
-        col1, col2 = st.columns([1,2])
+        col1, col2 = st.columns([1, 2])
         with col1:
-            avVel = st.slider(label="Define the wind velocity at 10m above ground", min_value=10., max_value=40., step=1.,
-                          value=25.)
+            avVel = st.slider(label="Define the wind velocity at 10m above ground", min_value=10., max_value=40.,
+                              step=1.,value=25.)
         # Input rotation angle
         with col2:
             rotAngle = st.slider(
-                label="Define the wind flow direction by rotating your building w.r.t the blue arrow (wind flow direction)",
+                label="Define the wind flow direction by rotating your building w.r.t the blue arrow.",
                 min_value=-180., max_value=180., step=1., value=0.)
         # Define rot Matrix and rotate stl
         rotMatrix = stl.mesh.Mesh.rotation_matrix([0.0, 0.0, 0.5], math.radians(rotAngle))
         submitted = st.form_submit_button("Submit")
+
     if build_mesh is not None:
         bytes_data = io.BytesIO(build_mesh.getvalue())
-        # Building as numpy-stl
-        building = stl.mesh.Mesh.from_file("tmp.stl", fh=bytes_data)
+
+        if build_mesh.name.split('.')[-1] == 'obj':
+            with tempfile.NamedTemporaryFile(suffix=".obj", delete=False) as temp_file:
+                temp_file.write(build_mesh.read())
+                temp_file.flush()
+
+                # Load the OBJ file using trimesh
+                building = trimesh.load_mesh(temp_file.name)
+
+        else:
+            with tempfile.NamedTemporaryFile(suffix=".stl", delete=False) as temp_file:
+                temp_file.write(build_mesh.read())
+                temp_file.flush()
+
+                # Load the OBJ file using trimesh
+                building = trimesh.load_mesh(temp_file.name)
 
     # Input the basis vel. at 10m hight.
 
-
     if build_mesh is not None:
+        vertices = building.vertices
+        faces = building.faces
+
+        building = stl.mesh.Mesh(np.zeros(faces.shape[0], dtype=stl.mesh.Mesh.dtype))
+        for i, face in enumerate(faces):
+            for j in range(3):
+                building.vectors[i][j] = vertices[face[j]]
+
         building.rotate_using_matrix(rotMatrix)
         volume, cog, inertia = building.get_mass_properties()
         building.translate([-1.*cog[0], -1.*cog[1], 0])
         #save stl for trimesh and import to trimesh for easy pt checking
         building.save("stl_tmp.stl")
+
         trimeshdata = trimesh.load_mesh("stl_tmp.stl", file_type='stl')
-        #st.write(trimeshdata)
+
 
 # visualisation
 with building_vis:
