@@ -410,10 +410,13 @@ with header:
     #about app
 with header.expander("What is str.FLOWer?", expanded=False):
     st.markdown("""
-    This is v.alpha of the **steady wind flow generator** based on an artificial neural network and so on ...
-    ...
-    Thanks to
-    ...
+    **str.FLOWer** is a revolutionary web application that seamlessly integrates cutting-edge AI technology with the world of architectural design and engineering.
+    This innovative platform allows users to upload 3D models of buildings, enabling them to instantaneously visualize and analyze the complex patterns of wind flow
+    around their structures. The name "str.FLOWer" is a clever combination of "structure" and "flow," emphasizing its core functionalities of evaluating aerodynamics
+    and air movement.
+    With str.FLOWer, architects, engineers, and designers can gain invaluable insights into how wind interacts with their building designs, facilitating informed 
+    decision-making during the planning and development stages. The platform leverages advanced artificial intelligence algorithms to simulate wind behavior around 
+    the uploaded 3D models, providing rapid and accurate results within seconds.
     """)
 
 with header.expander("CNN Model and Training Data", expanded=False):
