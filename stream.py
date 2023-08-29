@@ -417,6 +417,23 @@ with header.expander("What is str.FLOWer?", expanded=False):
     With str.FLOWer, architects, engineers, and designers can gain invaluable insights into how wind interacts with their building designs, facilitating informed 
     decision-making during the planning and development stages. The platform leverages advanced artificial intelligence algorithms to simulate wind behavior around 
     the uploaded 3D models, providing rapid and accurate results within seconds.
+
+    Key features of str.FLOWer may include:
+    **1. Efficiency**: The near-instantaneous nature of wind flow analysis sets str.FLOWer apart from traditional methods that could take days or even weeks to produce results.
+
+    **2. Accessibility**: Its user-friendly interface ensures that professionals from various disciplines can easily access and benefit from the insights offered by wind flow analysis.
+
+    **3. Visualization**: The platform likely offers interactive visualizations, allowing users to observe how wind currents interact with their building design from different angles.
+
+    **4. Optimization**: By identifying areas of potential turbulence or stagnation, str.FLOWer can aid in optimizing building layouts for enhanced comfort, energy efficiency, and safety.
+
+    **5. Design Iteration**: Architects can make real-time adjustments to their 3D models and instantly observe how those changes impact wind flow patterns, facilitating an iterative 
+    design process.
+
+    **6. Data-Driven Decision-Making**: The data provided by str.FLOWer empowers architects and engineers to make informed decisions based on quantifiable evidence.
+
+    **7. Risk Reduction**: By preemptively identifying potential wind-related issues, such as excessive pressure on certain building surfaces, str.FLOWer can contribute to 
+    reducing structural risks.
     """)
 
 with header.expander("CNN Model and Training Data", expanded=False):
