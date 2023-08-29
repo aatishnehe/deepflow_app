@@ -10,6 +10,7 @@ import plotly.figure_factory as ff
 import predict
 import tempfile
 
+
 def genQuiverPlot(vx, vy, freq):
     filter_freq = freq
 
@@ -45,7 +46,7 @@ def genQuiverPlot(vx, vy, freq):
     fig1 = ff.create_quiver(x_axis, Y[0], filtered_vx[0], filtered_vy[0], arrow_scale=.05, line=dict(color="#0000ff"))
 
     for i in range(res - 1):
-        #figname = 'fig_' + str(i)
+        # figname = 'fig_' + str(i)
         fig = ff.create_quiver(x_axis, Y[i + 1], filtered_vx[i + 1], filtered_vy[i + 1], arrow_scale=.05,
                                line=dict(color="#0000ff"))
         fig1.add_traces(data=fig.data)
@@ -55,7 +56,6 @@ def genQuiverPlot(vx, vy, freq):
 
 
 def genPlotlyResult(stl_mesh_building, ptX, ptY, ptZ, height, vel, nn_res, p_v_toggle, planeToggle, op, s, op_b):
-
     p_vert = nn_res[0, :, :]
     v_vert = nn_res[1, :, :]
     p_hor = nn_res[2, :, :]
@@ -74,18 +74,19 @@ def genPlotlyResult(stl_mesh_building, ptX, ptY, ptZ, height, vel, nn_res, p_v_t
     wx = np.zeros(len(windPoints))
     wy = np.zeros(len(windPoints))
     for i in range(len(windPoints)):
-        wy[i] = .5*(maxy+miny)
-        wx[i] = (minx-(abs(minx)+abs(maxx))*2) + s*atmFreeStreamX(vel, windPoints[i])
-    windPoints=np.append(windPoints, windPoints[-1])
-    windPoints=np.append(windPoints, windPoints[0])
-    wx=np.append(wx, wx[0])
-    wx=np.append(wx, wx[0])
-    wy=np.append(wy, wy[0])
-    wy=np.append(wy, wy[0])
+        wy[i] = .5 * (maxy + miny)
+        wx[i] = (minx - (abs(minx) + abs(maxx)) * 2) + s * atmFreeStreamX(vel, windPoints[i])
+    windPoints = np.append(windPoints, windPoints[-1])
+    windPoints = np.append(windPoints, windPoints[0])
+    wx = np.append(wx, wx[0])
+    wx = np.append(wx, wx[0])
+    wy = np.append(wy, wy[0])
+    wy = np.append(wy, wy[0])
 
-    windProfile = go.Scatter3d(x=wx, y=wy, z=windPoints, marker=dict(size=1,color='rgb(0,176,240)'), line=dict(color='rgb(0,176,240)',
-                                    width=3), name="ABL" )
-    Z = np.zeros(ptX.size*ptY.size)
+    windProfile = go.Scatter3d(x=wx, y=wy, z=windPoints, marker=dict(size=1, color='rgb(0,176,240)'),
+                               line=dict(color='rgb(0,176,240)',
+                                         width=3), name="ABL")
+    Z = np.zeros(ptX.size * ptY.size)
 
     Y0 = np.full(ptX.size, height[0])
     for p, item in enumerate(Z):
@@ -93,9 +94,11 @@ def genPlotlyResult(stl_mesh_building, ptX, ptY, ptZ, height, vel, nn_res, p_v_t
 
     # horizontales Profil
     if p_v_toggle == 1:
-        res_nn_h = go.Surface(x=ptX, y=ptY, z=Z.reshape(ptX.size, ptY.size), surfacecolor=p_hor, opacity=op, showscale=False)
+        res_nn_h = go.Surface(x=ptX, y=ptY, z=Z.reshape(ptX.size, ptY.size), surfacecolor=p_hor, opacity=op,
+                              showscale=False)
     elif p_v_toggle == 2:
-        res_nn_h = go.Surface(x=ptX, y=ptY, z=Z.reshape(ptX.size, ptY.size), surfacecolor=v_hor, opacity=op, showscale=False)
+        res_nn_h = go.Surface(x=ptX, y=ptY, z=Z.reshape(ptX.size, ptY.size), surfacecolor=v_hor, opacity=op,
+                              showscale=False)
 
     # vertikales Profil
     Zp = np.tile(ptZ, (1, ptX.size)).reshape(ptX.size, ptY.size)
@@ -128,14 +131,14 @@ def genPlotlyResult(stl_mesh_building, ptX, ptY, ptZ, height, vel, nn_res, p_v_t
 
     figure = go.Figure(data=plotData, layout=layout)
     figure.data[0].update(lighting=dict(ambient=0.18,
-                                     diffuse=1,
-                                     fresnel=.1,
-                                     specular=1,
-                                     roughness=.1,
-                                     facenormalsepsilon=0))
+                                        diffuse=1,
+                                        fresnel=.1,
+                                        specular=1,
+                                        roughness=.1,
+                                        facenormalsepsilon=0))
     figure.data[0].update(lightposition=dict(x=3000,
-                                          y=3000,
-                                          z=10000))
+                                             y=3000,
+                                             z=10000))
     figure.update_scenes(aspectmode="data")
 
     return figure
@@ -147,7 +150,7 @@ def preProcessingData(trimeshData):
     # get the bounding box
     try:
         boundingBox = trimeshData.bounds
-        #st.write(boundingBox)
+        # st.write(boundingBox)
 
     except:
         st.write("No mesh input loaded! Aborting...")
@@ -224,12 +227,10 @@ def preProcessingData(trimeshData):
                 input_df[0][z][x] = atmFreeStreamX(avVel, ptCloudV[curIndex][2])
             curIndex += 1
 
-
     return input_df
 
 
 def normalisation(data):
-
     max_inputs_0 = np.max(np.abs(data[0]))
     max_inputs_1 = np.max(np.abs(data[1]))
     max_inputs_2 = np.max(np.abs(data[2]))
@@ -249,15 +250,14 @@ def normalisation(data):
 
 # @st.cache
 def strFLOWPrediction_ver(DF):
-
     res_pressure = predict.predict_ver_pressure(DF)
     res_velocity = predict.predict_ver_vel(DF)
     np.copyto(inputArray, DF)
 
     return [res_pressure.detach().numpy(), res_velocity.detach().numpy()]
 
-def strFLOWPrediction_hor(DF):
 
+def strFLOWPrediction_hor(DF):
     res_pressure = predict.predict_hor_pressure(DF)
     res_velocity = predict.predict_hor_vel(DF)
     np.copyto(inputArray, DF)
@@ -285,7 +285,7 @@ def denormalise_pressure(DF, v_norm):
 
     max_p = np.max(np.abs(denormalised_df[0, :, :]))
 
-    denormalised_df[0, :, :] /= (1.0/max_p)
+    denormalised_df[0, :, :] /= (1.0 / max_p)
 
     denormalised_df[0, :, :] *= v_norm ** 2
 
@@ -347,7 +347,7 @@ footer_html = """
 .company-name a {
     color: #e84177;
 }
-    
+
 </style>
 
 <div class="footer">
@@ -359,12 +359,11 @@ footer_html = """
         <p>Email: <a href="mailto:info@str-ucture.com">info@str-ucture.com</a></p>
         <p>Phone: <a href="tel:+497112869370">+49 (0)711 286937-0</a></p>
     </div>
-    
+
 </div>
 """
 
 st.markdown(footer_html, unsafe_allow_html=True)
-
 
 # Global variables
 
@@ -394,7 +393,6 @@ result = False
 with header:
     col1, col2 = st.columns([3, 1])
     with col1:
-
         f = open("./Images/str.svg", "r")
         lines = f.readlines()
         line_string = ''.join(lines)
@@ -410,39 +408,42 @@ with header:
 
 with header.expander("What is str.FLOWer?", expanded=False):
     st.markdown("""
-     **str.FLOWer** is a revolutionary web application that seamlessly integrates cutting-edge AI technology with the world of architectural design and engineering.
-    This innovative platform allows users to upload 3D models of buildings, enabling them to instantaneously visualize and analyze the complex patterns of wind flow
-    around their structures. The name "str.FLOWer" is a clever combination of "structure" and "flow," emphasizing its core functionalities of evaluating aerodynamics
-    and air movement.
-    With str.FLOWer, architects, engineers, and designers can gain invaluable insights into how wind interacts with their building designs, facilitating informed 
-    decision-making during the planning and development stages. The platform leverages advanced artificial intelligence algorithms to simulate wind behavior around 
-    the uploaded 3D models, providing rapid and accurate results within seconds.
+        # Discover str.FLOWer: Where Architecture Meets AI
 
-    Key features of str.FLOWer may include:
-    **1. Efficiency**: The near-instantaneous nature of wind flow analysis sets str.FLOWer apart from traditional methods that could take days or even weeks to produce results.
+        Welcome to **str.FLOWer**, an extraordinary web application that seamlessly merges cutting-edge AI technology with the realm of architectural design and engineering.
 
-    **2. Accessibility**: Its user-friendly interface ensures that professionals from various disciplines can easily access and benefit from the insights offered by wind flow analysis.
+        Unleash Your Architectural Vision with AI-Driven Wind Flow Analysis
 
-    **3. Visualization**: The platform likely offers interactive visualizations, allowing users to observe how wind currents interact with their building design from different angles.
+        At **str.FLOWer**, we're redefining the way you perceive architectural design. Our groundbreaking platform empowers you to upload intricate 3D building models and witness the instantaneous visualization and analysis of intricate wind flow patterns enveloping your structures. The very name "str.FLOWer" ingeniously intertwines "structure" and "flow," underscoring its core mission of assessing aerodynamics and air movement.
 
-    **4. Optimization**: By identifying areas of potential turbulence or stagnation, str.FLOWer can aid in optimizing building layouts for enhanced comfort, energy efficiency, and safety.
+        ## Elevate Your Design Process
 
-    **5. Design Iteration**: Architects can make real-time adjustments to their 3D models and instantly observe how those changes impact wind flow patterns, facilitating an iterative 
-    design process.
+        With **str.FLOWer**, architects, engineers, and designers gain unparalleled insights into the dynamic interplay between wind and their building blueprints. This newfound clarity supercharges your decision-making throughout the planning and development phases. Our platform harnesses state-of-the-art artificial intelligence algorithms to replicate wind behavior around your 3D models, delivering rapid, precise results in mere seconds.
 
-    **6. Data-Driven Decision-Making**: The data provided by str.FLOWer empowers architects and engineers to make informed decisions based on quantifiable evidence.
+        ### Key Features
 
-    **7. Risk Reduction**: By preemptively identifying potential wind-related issues, such as excessive pressure on certain building surfaces, str.FLOWer can contribute to 
-    reducing structural risks.
-    """)
+        - **Efficiency**: Bid adieu to traditional methods that demand days or weeks for wind flow analysis. str.FLOWer's near-instantaneous assessments are in a league of their own.
 
-with header.expander("CNN Model and Training Data", expanded=False):
-    st.markdown("""
-    The CNN Network is similar to Thurey et al. 2020 ... Models are...
-    """)
+        - **Accessibility**: Embracing professionals across disciplines, our intuitive interface ensures easy access to wind flow insights that were once the domain of specialists.
+
+        - **Visualization**: Immerse yourself in interactive visualizations. Witness wind currents harmonize with your architectural masterpiece from every conceivable angle.
+
+        - **Optimization**: str.FLOWer unveils areas susceptible to turbulence or stagnation, empowering you to optimize layouts for comfort, energy efficiency, and safety.
+
+        - **Design Iteration**: Architects can seamlessly tweak their 3D models, instantly gauging the impact of alterations on wind flow dynamics—an invaluable asset for iterative design.
+
+        - **Data-Driven Decisions**: Embrace the power of data! str.FLOWer arms architects and engineers with empirical evidence, fostering informed choices backed by quantifiable insights.
+
+        - **Risk Mitigation**: By proactively detecting wind-related concerns, such as excessive surface pressure, str.FLOWer contributes to a future of minimized structural risks.
+
+        ### Join the Future Today
+
+        Elevate your architectural ventures with **str.FLOWer**. Revolutionize how you perceive wind flow, design responsiveness, and structural harmony. Experience the convergence of AI and architecture like never before.
+
+        [Get Started](#)    [Watch Demo](#)   [FAQ](#)
+        """)
 
 with user_input:
-
     st.subheader("Inputs")
     with st.form("Geometry"):
         build_mesh = st.file_uploader(label="Place your building as a closed .stl or .obj mesh here",
@@ -451,7 +452,7 @@ with user_input:
         col1, col2 = st.columns([1, 2])
         with col1:
             avVel = st.slider(label="Define the wind velocity at 10m above ground", min_value=10., max_value=40.,
-                              step=1.,value=25.)
+                              step=1., value=25.)
         # Input rotation angle
         with col2:
             rotAngle = st.slider(
@@ -493,12 +494,11 @@ with user_input:
 
         building.rotate_using_matrix(rotMatrix)
         volume, cog, inertia = building.get_mass_properties()
-        building.translate([-1.*cog[0], -1.*cog[1], 0])
-        #save stl for trimesh and import to trimesh for easy pt checking
+        building.translate([-1. * cog[0], -1. * cog[1], 0])
+        # save stl for trimesh and import to trimesh for easy pt checking
         building.save("stl_tmp.stl")
 
         trimeshdata = trimesh.load_mesh("stl_tmp.stl", file_type='stl')
-
 
 # visualisation
 with building_vis:
@@ -512,7 +512,8 @@ with building_vis:
         if trimeshdata.is_watertight:
             st.write('Nice, your mesh is watertight. That should work fine!')
         else:
-            st.write('Oh, your mesh is not watertight. This will cause problems. Please repair the mesh and come back later!')
+            st.write(
+                'Oh, your mesh is not watertight. This will cause problems. Please repair the mesh and come back later!')
             st.stop()
 
 # Compute button
@@ -543,8 +544,10 @@ with compute:
 
             inputDF = normalisation(inputDF)
 
-            [detachedPrediction_hor_pressure, detachedPrediction_hor_velocity] = strFLOWPrediction_hor(inputDF[[1,3], :, :])
-            [detachedPrediction_ver_pressure, detachedPrediction_ver_velocity] = strFLOWPrediction_ver(inputDF[[0,2], :, :])
+            [detachedPrediction_hor_pressure, detachedPrediction_hor_velocity] = strFLOWPrediction_hor(
+                inputDF[[1, 3], :, :])
+            [detachedPrediction_ver_pressure, detachedPrediction_ver_velocity] = strFLOWPrediction_ver(
+                inputDF[[0, 2], :, :])
 
             detachedPrediction[0] = detachedPrediction_ver_pressure
             detachedPrediction[1] = detachedPrediction_ver_velocity[0][0]
@@ -556,7 +559,7 @@ with compute:
                       np.max(np.abs(detachedPrediction[2, :, :])) ** 2 +
                       np.max(np.abs(detachedPrediction[3, :, :])) ** 2) ** 0.5
 
-            detachedPrediction[[1, 3]] = denormalise_velocity(detachedPrediction[[1,3]], v_norm)
+            detachedPrediction[[1, 3]] = denormalise_velocity(detachedPrediction[[1, 3]], v_norm)
             detachedPrediction[[0, 2]] = denormalise_velocity(detachedPrediction[[0, 2]], v_norm)
 
             st.session_state.prediction = detachedPrediction
@@ -579,8 +582,8 @@ def ClickpChecker():
 
 
 with viewer:
-
-    st.write("""Job done. Preprocessing the input data took and evaluating the artificial neurol network took %0.4s seconds.""" % st.session_state.calcTime)
+    st.write(
+        """Job done. Preprocessing the input data took and evaluating the artificial neurol network took %0.4s seconds.""" % st.session_state.calcTime)
     if st.session_state.predicted:
         st.subheader("Steady wind flow visualization")
         with st.form("Parameters"):
@@ -589,9 +592,10 @@ with viewer:
                 varSlider = st.select_slider("Visualise the ...", options=['pressure field', 'velocity field'])
             with col2:
                 cutPlanesVis = st.multiselect("Select horizontal and/or vertical cut planes",
-                                          ['vertical cutplane', 'horizontal cutplane'], ['vertical cutplane'])
+                                              ['vertical cutplane', 'horizontal cutplane'], ['vertical cutplane'])
                 opacity = st.slider(label="Plane opacity", min_value=0., max_value=100., step=5., value=100.)
-                opacity_building = st.slider(label="Building opacity", min_value=0., max_value=100., step=5., value=100.)
+                opacity_building = st.slider(label="Building opacity", min_value=0., max_value=100., step=5.,
+                                             value=100.)
             submitted = st.form_submit_button("Submit")
         cutPlaneToggle = 0
         if 'vertical cutplane' in cutPlanesVis and 'horizontal cutplane' in cutPlanesVis:
@@ -609,9 +613,8 @@ with viewer:
         elif varSlider == 'velocity field':
             varSliderToggle = 2
 
-
         figResult = genPlotlyResult(building, st.session_state.ptx, st.session_state.pty, st.session_state.ptz,
                                     st.session_state.cutH, avVel, st.session_state.prediction, varSliderToggle,
-                                    cutPlaneToggle, opacity/100., windProfileScaleFactor, opacity_building/100.)
+                                    cutPlaneToggle, opacity / 100., windProfileScaleFactor, opacity_building / 100.)
 
         st.plotly_chart(figResult, use_container_width=True)
